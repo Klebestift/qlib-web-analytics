@@ -26,14 +26,28 @@ class QLibDataProcessor:
         try:
             df = pd.read_csv(io.BytesIO(file_content))
             
-            required_columns = ['instrument', 'datetime', 'return']
-            if not all(col in df.columns for col in required_columns):
-                return {
-                    "success": False, 
-                    "error": f"Missing required columns. Expected: {required_columns}, Got: {list(df.columns)}"
-                }
+            if 'DateTime' in df.columns and 'PnL' in df.columns and 'Instrument' in df.columns:
+                df = df.rename(columns={
+                    'DateTime': 'datetime',
+                    'Instrument': 'instrument', 
+                    'PnL': 'return'
+                })
+                df = df[['instrument', 'datetime', 'return']]
+            else:
+                required_columns = ['instrument', 'datetime', 'return']
+                if not all(col in df.columns for col in required_columns):
+                    return {
+                        "success": False, 
+                        "error": f"Missing required columns. Expected: {required_columns} or DateTime,Instrument,PnL format. Got: {list(df.columns)}"
+                    }
             
-            df['datetime'] = pd.to_datetime(df['datetime'])
+            df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+            
+            df = df.dropna(subset=['datetime'])
+            
+            if len(df) == 0:
+                return {"success": False, "error": "No valid data rows after date parsing"}
+            
             df = df.set_index(['instrument', 'datetime'])
             
             self.data_storage['trade_data'] = df
@@ -53,14 +67,32 @@ class QLibDataProcessor:
         try:
             df = pd.read_csv(io.BytesIO(file_content))
             
-            required_columns = ['instrument', 'datetime', 'open', 'high', 'low', 'close', 'volume']
-            if not all(col in df.columns for col in required_columns):
-                return {
-                    "success": False,
-                    "error": f"Missing required columns. Expected: {required_columns}, Got: {list(df.columns)}"
-                }
+            if 'dates' in df.columns and 'Open' in df.columns:
+                df = df.rename(columns={
+                    'dates': 'datetime',
+                    'Open': 'open',
+                    'High': 'high', 
+                    'Low': 'low',
+                    'Close': 'close',
+                    'Volume': 'volume'
+                })
+                if 'instrument' not in df.columns:
+                    df['instrument'] = 'DEFAULT'
+            else:
+                required_columns = ['instrument', 'datetime', 'open', 'high', 'low', 'close', 'volume']
+                if not all(col in df.columns for col in required_columns):
+                    return {
+                        "success": False,
+                        "error": f"Missing required columns. Expected: {required_columns} or dates,Open,High,Low,Close,Volume format. Got: {list(df.columns)}"
+                    }
             
-            df['datetime'] = pd.to_datetime(df['datetime'])
+            df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+            
+            df = df.dropna(subset=['datetime'])
+            
+            if len(df) == 0:
+                return {"success": False, "error": "No valid data rows after date parsing"}
+            
             df = df.set_index(['instrument', 'datetime'])
             
             self.data_storage['price_data'] = df

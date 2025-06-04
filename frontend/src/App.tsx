@@ -34,10 +34,10 @@ function App() {
         <header className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-3">
             <TrendingUp className="h-10 w-10 text-blue-600" />
-            QLib Web Analytics
+            QLib Web Analytics v2.0
           </h1>
           <p className="text-xl text-gray-600">
-            Quantitative Investment Analysis Platform
+            Quantitative Investment Analysis Platform - Updated {new Date().toISOString().split('T')[0]}
           </p>
         </header>
 
@@ -85,13 +85,13 @@ function App() {
           <FileUpload
             endpoint="/upload/trades"
             title="Upload Trade Data"
-            description="Upload CSV file with trade series data (instrument, datetime, return)"
+            description="Upload CSV file with trade data. Supports: (instrument, datetime, return) or (DateTime, Instrument, PnL) formats"
             onUploadSuccess={handleUploadSuccess}
           />
           <FileUpload
             endpoint="/upload/prices"
             title="Upload Price Data"
-            description="Upload CSV file with OHLCV price data (instrument, datetime, open, high, low, close, volume)"
+            description="Upload CSV file with price data. Supports: (instrument, datetime, open, high, low, close, volume) or (dates, Open, High, Low, Close, Volume) formats"
             onUploadSuccess={handleUploadSuccess}
           />
         </div>
