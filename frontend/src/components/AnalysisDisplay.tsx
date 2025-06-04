@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { BarChart3, TrendingUp, Activity, Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ dataAvailable 
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:8000/analyze/${type}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/analyze/${type}`);
       const data = await response.json();
 
       if (response.ok) {

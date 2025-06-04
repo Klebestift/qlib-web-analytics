@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
-import { TrendingUp, Database, BarChart3 } from 'lucide-react';
+import { TrendingUp, Database } from 'lucide-react';
 
 function App() {
   const [dataSummary, setDataSummary] = useState<any>(null);
@@ -10,7 +10,7 @@ function App() {
 
   const fetchDataSummary = async () => {
     try {
-      const response = await fetch('http://localhost:8000/data/summary');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/data/summary`);
       const data = await response.json();
       setDataSummary(data);
     } catch (error) {

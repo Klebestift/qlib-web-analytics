@@ -40,7 +40,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     formData.append('file', file);
 
     try {
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${endpoint}`, {
         method: 'POST',
         body: formData,
       });
