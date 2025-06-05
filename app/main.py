@@ -72,6 +72,11 @@ async def analyze_portfolio():
         
         analysis_df = dataset_result["analysis_data"]
         
+        metrics_result = data_processor.calculate_factor_metrics(analysis_df)
+        if not metrics_result["success"]:
+            raise HTTPException(status_code=400, detail=f"Metrics calculation failed: {metrics_result.get('error', 'Unknown error')}")
+        
+        metrics = metrics_result["metrics"]
         
         dates = analysis_df.index.get_level_values('datetime').unique()
         returns = []
@@ -95,13 +100,13 @@ async def analyze_portfolio():
         )
         
         figures = [fig]
-        
         figure_json = [fig.to_json() for fig in figures]
         
         return {
             "success": True,
             "analysis_type": "portfolio",
             "figures": figure_json,
+            "metrics": metrics,
             "summary": {
                 "total_return": sum(returns),
                 "avg_return": np.mean(returns),
@@ -110,7 +115,10 @@ async def analyze_portfolio():
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis error: {str(e)}")
+        import traceback
+        error_details = f"Analysis error: {str(e)}\nTraceback: {traceback.format_exc()}"
+        print(f"Analysis error: {error_details}")  # Add console logging
+        raise HTTPException(status_code=500, detail=error_details)
 
 @app.get("/analyze/model")
 async def analyze_model():
@@ -120,6 +128,12 @@ async def analyze_model():
             raise HTTPException(status_code=400, detail=dataset_result["error"])
         
         analysis_df = dataset_result["analysis_data"]
+        
+        metrics_result = data_processor.calculate_factor_metrics(analysis_df)
+        if not metrics_result["success"]:
+            raise HTTPException(status_code=400, detail=f"Metrics calculation failed: {metrics_result.get('error', 'Unknown error')}")
+        
+        metrics = metrics_result["metrics"]
         
         ic_values = []
         dates = analysis_df.index.get_level_values('datetime').unique()
@@ -145,13 +159,13 @@ async def analyze_model():
         )
         
         figures = [fig]
-        
         figure_json = [fig.to_json() for fig in figures]
         
         return {
             "success": True,
             "analysis_type": "model",
             "figures": figure_json,
+            "metrics": metrics,
             "summary": {
                 "data_points": len(analysis_df),
                 "instruments": len(analysis_df.index.get_level_values('instrument').unique()),
@@ -160,7 +174,10 @@ async def analyze_model():
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis error: {str(e)}")
+        import traceback
+        error_details = f"Analysis error: {str(e)}\nTraceback: {traceback.format_exc()}"
+        print(f"Analysis error: {error_details}")  # Add console logging
+        raise HTTPException(status_code=500, detail=error_details)
 
 @app.get("/analyze/all")
 async def analyze_all():
