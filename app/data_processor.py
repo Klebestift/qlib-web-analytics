@@ -2,25 +2,12 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, Optional
 import io
-import qlib
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.data.dataset.loader import QlibDataLoader
-from qlib.data.dataset.processor import ZScoreNorm, Fillna
-from qlib.contrib.data.handler import Alpha158
 
 
 class QLibDataProcessor:
     def __init__(self):
         self.data_storage = {}
-        self.is_initialized = False
-        
-    def initialize_qlib(self):
-        if not self.is_initialized:
-            try:
-                qlib.init()
-                self.is_initialized = True
-            except Exception as e:
-                print(f"QLib initialization failed: {e}")
+        self.is_initialized = True
                 
     def process_trade_data(self, file_content: bytes, filename: str) -> Dict[str, Any]:
         try:
@@ -133,37 +120,35 @@ class QLibDataProcessor:
             
         return summary
     
-    def prepare_qlib_dataset(self) -> Optional[Dict[str, Any]]:
+    def prepare_analysis_dataset(self) -> Optional[Dict[str, Any]]:
         if "trade_data" not in self.data_storage:
             return {"success": False, "error": "No trade data available"}
             
         try:
-            self.initialize_qlib()
-            
             trade_df = self.data_storage["trade_data"]
             
             dates = trade_df.index.get_level_values('datetime').unique()
             instruments = trade_df.index.get_level_values('instrument').unique()
             
-            pred_label_data = []
+            analysis_data = []
             for date in dates:
                 for instrument in instruments:
                     if (instrument, date) in trade_df.index:
                         return_val = trade_df.loc[(instrument, date), 'return']
-                        pred_label_data.append({
+                        analysis_data.append({
                             'datetime': date,
                             'instrument': instrument,
-                            'label': return_val,
+                            'return': return_val,
                             'score': np.random.randn()
                         })
             
-            pred_label_df = pd.DataFrame(pred_label_data)
-            pred_label_df = pred_label_df.set_index(['instrument', 'datetime'])
+            analysis_df = pd.DataFrame(analysis_data)
+            analysis_df = analysis_df.set_index(['instrument', 'datetime'])
             
             return {
                 "success": True,
-                "pred_label_data": pred_label_df,
-                "message": "Dataset prepared for QLib analysis"
+                "analysis_data": analysis_df,
+                "message": "Dataset prepared for analysis"
             }
             
         except Exception as e:

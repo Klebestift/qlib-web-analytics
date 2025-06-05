@@ -8,14 +8,10 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = {extras = ["standard"], version = "^0.115.12"}
-psycopg = {extras = ["binary"], version = "^3.2.9"}
-pyqlib = "^0.9.6"
 plotly = "^6.1.2"
 pandas = "^2.2.3"
 numpy = "^2.2.6"
-scipy = "^1.15.3"
-statsmodels = "^0.14.4"
-matplotlib = "^3.10.3"
+python-multipart = "^0.0.6"
 
 
 [build-system]

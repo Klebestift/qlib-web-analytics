@@ -66,18 +66,18 @@ async def get_data_summary():
 @app.get("/analyze/portfolio")
 async def analyze_portfolio():
     try:
-        dataset_result = data_processor.prepare_qlib_dataset()
+        dataset_result = data_processor.prepare_analysis_dataset()
         if not dataset_result["success"]:
             raise HTTPException(status_code=400, detail=dataset_result["error"])
         
-        pred_label_df = dataset_result["pred_label_data"]
+        analysis_df = dataset_result["analysis_data"]
         
         
-        dates = pred_label_df.index.get_level_values('datetime').unique()
+        dates = analysis_df.index.get_level_values('datetime').unique()
         returns = []
         for date in dates:
-            date_data = pred_label_df[pred_label_df.index.get_level_values('datetime') == date]
-            avg_return = date_data['label'].mean()
+            date_data = analysis_df[analysis_df.index.get_level_values('datetime') == date]
+            avg_return = date_data['return'].mean()
             returns.append(avg_return)
         
         cumulative_returns = np.cumsum(returns)
@@ -117,21 +117,21 @@ async def analyze_portfolio():
 @app.get("/analyze/model")
 async def analyze_model():
     try:
-        dataset_result = data_processor.prepare_qlib_dataset()
+        dataset_result = data_processor.prepare_analysis_dataset()
         if not dataset_result["success"]:
             raise HTTPException(status_code=400, detail=dataset_result["error"])
         
-        pred_label_df = dataset_result["pred_label_data"]
+        analysis_df = dataset_result["analysis_data"]
         
         
         import plotly.graph_objects as go
         
         ic_values = []
-        dates = pred_label_df.index.get_level_values('datetime').unique()
+        dates = analysis_df.index.get_level_values('datetime').unique()
         for date in dates:
-            date_data = pred_label_df[pred_label_df.index.get_level_values('datetime') == date]
+            date_data = analysis_df[analysis_df.index.get_level_values('datetime') == date]
             if len(date_data) > 1:
-                ic = np.corrcoef(date_data['score'], date_data['label'])[0, 1]
+                ic = np.corrcoef(date_data['score'], date_data['return'])[0, 1]
                 ic_values.append(ic if not np.isnan(ic) else 0)
             else:
                 ic_values.append(0)
@@ -158,9 +158,9 @@ async def analyze_model():
             "analysis_type": "model",
             "figures": figure_json,
             "summary": {
-                "data_points": len(pred_label_df),
-                "instruments": len(pred_label_df.index.get_level_values('instrument').unique()),
-                "date_range": f"{pred_label_df.index.get_level_values('datetime').min()} to {pred_label_df.index.get_level_values('datetime').max()}"
+                "data_points": len(analysis_df),
+                "instruments": len(analysis_df.index.get_level_values('instrument').unique()),
+                "date_range": f"{analysis_df.index.get_level_values('datetime').min()} to {analysis_df.index.get_level_values('datetime').max()}"
             }
         }
         
