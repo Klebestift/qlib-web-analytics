@@ -7,7 +7,6 @@ import io
 class QLibDataProcessor:
     def __init__(self):
         self.data_storage = {}
-        self.is_initialized = True
                 
     def process_trade_data(self, file_content: bytes, filename: str) -> Dict[str, Any]:
         try:
@@ -99,7 +98,7 @@ class QLibDataProcessor:
         summary = {
             "trade_data_available": "trade_data" in self.data_storage,
             "price_data_available": "price_data" in self.data_storage,
-            "qlib_initialized": self.is_initialized
+            "qlib_initialized": True
         }
         
         if "trade_data" in self.data_storage:

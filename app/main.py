@@ -1,9 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import json
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
 from typing import Dict, Any
 
 from .data_processor import QLibDataProcessor
@@ -81,8 +81,6 @@ async def analyze_portfolio():
             returns.append(avg_return)
         
         cumulative_returns = np.cumsum(returns)
-        
-        import plotly.graph_objects as go
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=list(range(len(cumulative_returns))),
@@ -122,9 +120,6 @@ async def analyze_model():
             raise HTTPException(status_code=400, detail=dataset_result["error"])
         
         analysis_df = dataset_result["analysis_data"]
-        
-        
-        import plotly.graph_objects as go
         
         ic_values = []
         dates = analysis_df.index.get_level_values('datetime').unique()
